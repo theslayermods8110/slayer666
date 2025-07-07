@@ -3,35 +3,33 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Sensibilidad Free Fire</title>
+  <title>Sensibilidad Free Fire + Música Phonk</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
   <style>
     body {
       background: #0a0014;
-      font-family: sans-serif;
+      font-family: 'Orbitron', sans-serif;
       color: white;
       margin: 0;
       padding: 20px;
     }
-
     .container {
       background: #1a1a1a;
       border-radius: 20px;
       padding: 20px;
       max-width: 400px;
       margin: auto;
+      box-shadow: 0 0 20px #0008;
     }
-
     .item {
       display: flex;
       align-items: center;
       margin-bottom: 16px;
     }
-
     .label {
       width: 100px;
       font-size: 15px;
     }
-
     .bar-container {
       flex: 1;
       height: 12px;
@@ -41,14 +39,12 @@
       position: relative;
       touch-action: none;
     }
-
     .bar-fill {
-      background: #007bff;
+      background: #00f2ff;
       height: 100%;
       width: 0%;
       transition: width 0.1s;
     }
-
     .value {
       margin-left: 10px;
       width: 40px;
@@ -58,13 +54,11 @@
       border: none;
       color: white;
     }
-
     .value:focus {
       outline: none;
       background: #222;
       border-radius: 4px;
     }
-
     .footer {
       display: flex;
       justify-content: space-between;
@@ -73,17 +67,14 @@
       padding: 12px 15px;
       margin-top: 20px;
     }
-
     .footer .dpi-section, .footer .like-section {
       display: flex;
       align-items: center;
     }
-
     .footer img {
       width: 18px;
       margin-right: 6px;
     }
-
     .footer input {
       width: 60px;
       font-size: 14px;
@@ -91,44 +82,44 @@
       border: none;
       color: white;
       text-align: right;
+      font-family: 'Orbitron', sans-serif;
     }
-
     .footer input:focus {
       outline: none;
       background: #222;
       border-radius: 4px;
     }
+    #ytplayer {
+      position: absolute;
+      top: -9999px;
+      left: -9999px;
+      width: 1px;
+      height: 1px;
+      pointer-events: none;
+    }
   </style>
 </head>
-<body>
+<body ontouchstart="">
   <div class="container" id="sensContainer"></div>
 
   <div class="footer">
     <div class="dpi-section">
       <img src="https://img.icons8.com/ios-filled/50/ffffff/smartphone-tablet.png"/>
-      DPI: <input id="dpiInput" value="550" />
+      DPI: <input id="dpiInput" value="0" />
     </div>
     <div class="like-section">
       <img src="https://img.icons8.com/fluency-systems-filled/48/ffffff/facebook-like.png"/>
-      <input id="likesInput" value="27077" />
+      <input id="likesInput" value="0" />
     </div>
   </div>
 
-  <script>
-    const items = [
-      "General",
-      "Punto Rojo",
-      "Mira X2",
-      "Mira X4",
-      "Mira AWM",
-      "Vista Libre",
-      "Tamaño Botón",
-      "DPI"
-    ];
+  <div id="ytplayer"></div>
 
+  <script>
+    const items = ["General", "Punto Rojo", "Mira X2", "Mira X4", "Mira AWM", "Vista Libre", "Tamaño Botón", "DPI"];
     const container = document.getElementById("sensContainer");
     const values = Array(items.length).fill(0);
-    values[7] = 550;
+    values[7] = 0;
 
     items.forEach((label, index) => {
       const div = document.createElement("div");
@@ -138,12 +129,11 @@
         <div class="bar-container" data-index="${index}">
           <div class="bar-fill" id="bar${index}"></div>
         </div>
-        <input class="value" id="val${index}" value="${index === 7 ? 550 : 0}" />
+        <input class="value" id="val${index}" value="${index === 7 ? 0 : 0}" />
       `;
       container.appendChild(div);
     });
 
-    // Deslizar sensibilidad o DPI
     document.querySelectorAll(".bar-container").forEach(bar => {
       bar.addEventListener("touchstart", update);
       bar.addEventListener("touchmove", update);
@@ -170,13 +160,11 @@
       }
     }
 
-    // Permitir editar los números manualmente
     for (let i = 0; i < 8; i++) {
       const input = document.getElementById(`val${i}`);
       input.addEventListener("change", () => {
         let val = parseInt(input.value);
         if (isNaN(val)) return;
-
         if (i === 7) {
           val = Math.max(200, Math.min(1000, val));
           values[7] = val;
@@ -187,12 +175,10 @@
           values[i] = val;
           document.getElementById(`bar${i}`).style.width = `${(val / 200) * 100}%`;
         }
-
         input.value = val;
       });
     }
 
-    // DPI desde input inferior
     document.getElementById("dpiInput").addEventListener("change", (e) => {
       let val = parseInt(e.target.value);
       if (isNaN(val)) return;
@@ -202,11 +188,64 @@
       document.getElementById("bar7").style.width = `${((val - 200) / 800) * 100}%`;
     });
 
-    // Likes editables
     document.getElementById("likesInput").addEventListener("change", (e) => {
       let val = parseInt(e.target.value);
       if (isNaN(val)) e.target.value = 0;
     });
+
+    // YouTube API script
+    const tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    document.body.appendChild(tag);
+
+    let player;
+    function onYouTubeIframeAPIReady() {
+      player = new YT.Player('ytplayer', {
+        videoId: '5tMuEHtBp2s',
+        playerVars: {
+          autoplay: 1,
+          controls: 0,
+          modestbranding: 1,
+          loop: 1,
+          playlist: '5tMuEHtBp2s',
+          fs: 0,
+          disablekb: 1,
+          mute: 0,
+          playsinline: 1
+        },
+        events: {
+          onReady: onPlayerReady,
+          onStateChange: onPlayerStateChange
+        }
+      });
+    }
+
+    function onPlayerReady(e) {
+      e.target.setVolume(100);
+      e.target.playVideo();
+
+      if (navigator.vibrate) {
+        navigator.vibrate([100, 50, 100]);
+      }
+
+      document.addEventListener("click", () => {
+        player.setVolume(100);
+        player.playVideo();
+      }, { once: true });
+
+      document.addEventListener("visibilitychange", () => {
+        if (!document.hidden) {
+          player.setVolume(100);
+          player.playVideo();
+        }
+      });
+    }
+
+    function onPlayerStateChange(e) {
+      if (e.data !== YT.PlayerState.PLAYING) {
+        player.playVideo();
+      }
+    }
   </script>
 </body>
 </html>
