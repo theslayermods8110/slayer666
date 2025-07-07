@@ -2,96 +2,211 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sala de Voz Real</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-black text-white flex flex-col items-center justify-center min-h-screen p-6 space-y-6">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sensibilidad Free Fire</title>
+  <style>
+    body {
+      background: #0a0014;
+      font-family: sans-serif;
+      color: white;
+      margin: 0;
+      padding: 20px;
+    }
 
-  <h1 class="text-3xl font-bold text-center">Sala de Voz</h1>
-  <div id="users" class="flex flex-wrap gap-4 justify-center"></div>
-  <button id="toggleMic" class="bg-red-600 hover:bg-red-500 px-6 py-2 rounded-lg">Silenciar Micro</button>
+    .container {
+      background: #1a1a1a;
+      border-radius: 20px;
+      padding: 20px;
+      max-width: 400px;
+      margin: auto;
+    }
+
+    .item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .label {
+      width: 100px;
+      font-size: 15px;
+    }
+
+    .bar-container {
+      flex: 1;
+      height: 12px;
+      background: #333;
+      border-radius: 10px;
+      overflow: hidden;
+      position: relative;
+      touch-action: none;
+    }
+
+    .bar-fill {
+      background: #007bff;
+      height: 100%;
+      width: 0%;
+      transition: width 0.1s;
+    }
+
+    .value {
+      margin-left: 10px;
+      width: 40px;
+      text-align: right;
+      font-size: 15px;
+      background: transparent;
+      border: none;
+      color: white;
+    }
+
+    .value:focus {
+      outline: none;
+      background: #222;
+      border-radius: 4px;
+    }
+
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      background: #1a1a1a;
+      border-radius: 10px;
+      padding: 12px 15px;
+      margin-top: 20px;
+    }
+
+    .footer .dpi-section, .footer .like-section {
+      display: flex;
+      align-items: center;
+    }
+
+    .footer img {
+      width: 18px;
+      margin-right: 6px;
+    }
+
+    .footer input {
+      width: 60px;
+      font-size: 14px;
+      background: transparent;
+      border: none;
+      color: white;
+      text-align: right;
+    }
+
+    .footer input:focus {
+      outline: none;
+      background: #222;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="sensContainer"></div>
+
+  <div class="footer">
+    <div class="dpi-section">
+      <img src="https://img.icons8.com/ios-filled/50/ffffff/smartphone-tablet.png"/>
+      DPI: <input id="dpiInput" value="550" />
+    </div>
+    <div class="like-section">
+      <img src="https://img.icons8.com/fluency-systems-filled/48/ffffff/facebook-like.png"/>
+      <input id="likesInput" value="27077" />
+    </div>
+  </div>
 
   <script>
-    const myId = crypto.randomUUID().slice(0, 6);
-    const users = {};
-    const ws = new WebSocket("wss://nombre-de-tu-servidor.glitch.me");  // Reemplaza con la URL real de tu servidor en Glitch
+    const items = [
+      "General",
+      "Punto Rojo",
+      "Mira X2",
+      "Mira X4",
+      "Mira AWM",
+      "Vista Libre",
+      "Tamaño Botón",
+      "DPI"
+    ];
 
-    const usersDiv = document.getElementById('users');
-    let micOn = true;
-    let localStream;
+    const container = document.getElementById("sensContainer");
+    const values = Array(items.length).fill(0);
+    values[7] = 550;
 
-    function createUserIcon(id, isSelf = false) {
+    items.forEach((label, index) => {
       const div = document.createElement("div");
-      div.className = "flex flex-col items-center";
-      div.id = "user-" + id;
-
-      const circle = document.createElement("div");
-      circle.className = "w-16 h-16 rounded-full bg-gray-600 flex items-center justify-center text-xl font-bold transition-all";
-      circle.textContent = isSelf ? "Yo" : id.slice(0, 2).toUpperCase();
-      div.appendChild(circle);
-
-      const label = document.createElement("div");
-      label.className = "mt-2 text-sm text-center";
-      label.textContent = isSelf ? "Tú" : id;
-      div.appendChild(label);
-
-      usersDiv.appendChild(div);
-      users[id] = { element: circle };
-    }
-
-    function updateSpeaking(id, speaking) {
-      const circle = users[id]?.element;
-      if (circle) {
-        circle.classList.toggle("bg-green-500", speaking);
-        circle.classList.toggle("bg-gray-600", !speaking);
-      }
-    }
-
-    ws.onopen = () => {
-      ws.send(JSON.stringify({ type: "join", id: myId }));
-    };
-
-    ws.onmessage = (msg) => {
-      const data = JSON.parse(msg.data);
-      if (data.type === "join" && data.id !== myId && !users[data.id]) {
-        createUserIcon(data.id);
-      }
-      if (data.type === "speaking" && data.id !== myId) {
-        updateSpeaking(data.id, data.speaking);
-      }
-    };
-
-    navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
-      localStream = stream;
-      createUserIcon(myId, true);
-
-      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      const analyser = audioCtx.createAnalyser();
-      const source = audioCtx.createMediaStreamSource(stream);
-      source.connect(analyser);
-      analyser.fftSize = 256;
-
-      const data = new Uint8Array(analyser.frequencyBinCount);
-
-      function detectVoice() {
-        analyser.getByteFrequencyData(data);
-        const volume = data.reduce((a, b) => a + b) / data.length;
-        const speaking = volume > 15;
-        updateSpeaking(myId, speaking);
-        ws.send(JSON.stringify({ type: "speaking", id: myId, speaking }));
-        requestAnimationFrame(detectVoice);
-      }
-
-      detectVoice();
+      div.className = "item";
+      div.innerHTML = `
+        <div class="label">${label}</div>
+        <div class="bar-container" data-index="${index}">
+          <div class="bar-fill" id="bar${index}"></div>
+        </div>
+        <input class="value" id="val${index}" value="${index === 7 ? 550 : 0}" />
+      `;
+      container.appendChild(div);
     });
 
-    document.getElementById('toggleMic').onclick = () => {
-      micOn = !micOn;
-      localStream.getAudioTracks()[0].enabled = micOn;
-      document.getElementById('toggleMic').textContent = micOn ? "Silenciar Micro" : "Activar Micro";
-    };
-  </script>
+    // Deslizar sensibilidad o DPI
+    document.querySelectorAll(".bar-container").forEach(bar => {
+      bar.addEventListener("touchstart", update);
+      bar.addEventListener("touchmove", update);
+    });
 
+    function update(e) {
+      e.preventDefault();
+      const touch = e.touches[0];
+      const index = parseInt(this.dataset.index);
+      const rect = this.getBoundingClientRect();
+      const percent = Math.min(100, Math.max(0, ((touch.clientX - rect.left) / rect.width) * 100));
+      const barFill = document.getElementById(`bar${index}`);
+      const input = document.getElementById(`val${index}`);
+
+      if (index === 7) {
+        values[7] = 200 + Math.round((percent / 100) * 800);
+        barFill.style.width = `${((values[7] - 200) / 800) * 100}%`;
+        input.value = values[7];
+        document.getElementById("dpiInput").value = values[7];
+      } else {
+        values[index] = Math.round((percent / 100) * 200);
+        barFill.style.width = `${percent}%`;
+        input.value = values[index];
+      }
+    }
+
+    // Permitir editar los números manualmente
+    for (let i = 0; i < 8; i++) {
+      const input = document.getElementById(`val${i}`);
+      input.addEventListener("change", () => {
+        let val = parseInt(input.value);
+        if (isNaN(val)) return;
+
+        if (i === 7) {
+          val = Math.max(200, Math.min(1000, val));
+          values[7] = val;
+          document.getElementById("dpiInput").value = val;
+          document.getElementById("bar7").style.width = `${((val - 200) / 800) * 100}%`;
+        } else {
+          val = Math.max(0, Math.min(200, val));
+          values[i] = val;
+          document.getElementById(`bar${i}`).style.width = `${(val / 200) * 100}%`;
+        }
+
+        input.value = val;
+      });
+    }
+
+    // DPI desde input inferior
+    document.getElementById("dpiInput").addEventListener("change", (e) => {
+      let val = parseInt(e.target.value);
+      if (isNaN(val)) return;
+      val = Math.max(200, Math.min(1000, val));
+      values[7] = val;
+      document.getElementById("val7").value = val;
+      document.getElementById("bar7").style.width = `${((val - 200) / 800) * 100}%`;
+    });
+
+    // Likes editables
+    document.getElementById("likesInput").addEventListener("change", (e) => {
+      let val = parseInt(e.target.value);
+      if (isNaN(val)) e.target.value = 0;
+    });
+  </script>
 </body>
 </html>
