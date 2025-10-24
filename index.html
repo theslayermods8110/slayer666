@@ -1,251 +1,72 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Sensibilidad Free Fire + Música Phonk</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
-  <style>
-    body {
-      background: #0a0014;
-      font-family: 'Orbitron', sans-serif;
-      color: white;
-      margin: 0;
-      padding: 20px;
-    }
-    .container {
-      background: #1a1a1a;
-      border-radius: 20px;
-      padding: 20px;
-      max-width: 400px;
-      margin: auto;
-      box-shadow: 0 0 20px #0008;
-    }
-    .item {
-      display: flex;
-      align-items: center;
-      margin-bottom: 16px;
-    }
-    .label {
-      width: 100px;
-      font-size: 15px;
-    }
-    .bar-container {
-      flex: 1;
-      height: 12px;
-      background: #333;
-      border-radius: 10px;
-      overflow: hidden;
-      position: relative;
-      touch-action: none;
-    }
-    .bar-fill {
-      background: #00f2ff;
-      height: 100%;
-      width: 0%;
-      transition: width 0.1s;
-    }
-    .value {
-      margin-left: 10px;
-      width: 40px;
-      text-align: right;
-      font-size: 15px;
-      background: transparent;
-      border: none;
-      color: white;
-    }
-    .value:focus {
-      outline: none;
-      background: #222;
-      border-radius: 4px;
-    }
-    .footer {
-      display: flex;
-      justify-content: space-between;
-      background: #1a1a1a;
-      border-radius: 10px;
-      padding: 12px 15px;
-      margin-top: 20px;
-    }
-    .footer .dpi-section, .footer .like-section {
-      display: flex;
-      align-items: center;
-    }
-    .footer img {
-      width: 18px;
-      margin-right: 6px;
-    }
-    .footer input {
-      width: 60px;
-      font-size: 14px;
-      background: transparent;
-      border: none;
-      color: white;
-      text-align: right;
-      font-family: 'Orbitron', sans-serif;
-    }
-    .footer input:focus {
-      outline: none;
-      background: #222;
-      border-radius: 4px;
-    }
-    #ytplayer {
-      position: absolute;
-      top: -9999px;
-      left: -9999px;
-      width: 1px;
-      height: 1px;
-      pointer-events: none;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Renombrador de Imágenes ZIP</title>
+<style>
+body{
+  background:#111;color:#fff;font-family:sans-serif;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  height:100vh;text-align:center
+}
+input[type=file]{
+  background:#222;border:2px dashed #555;padding:20px;border-radius:10px;
+  cursor:pointer;color:#aaa;width:80%;max-width:400px
+}
+button{
+  margin-top:20px;padding:10px 25px;font-size:16px;border:none;
+  border-radius:10px;background:#0a84ff;color:#fff;cursor:pointer;
+  transition:.2s
+}
+button:hover{background:#006edc}
+#status{margin-top:20px;color:#0f0}
+</style>
 </head>
-<body ontouchstart="">
-  <div class="container" id="sensContainer"></div>
+<body>
+  <h2>Renombrar imágenes dentro de ZIP</h2>
+  <input type="file" id="zipInput" accept=".zip">
+  <button id="processBtn">Procesar y Descargar</button>
+  <div id="status"></div>
 
-  <div class="footer">
-    <div class="dpi-section">
-      <img src="https://img.icons8.com/ios-filled/50/ffffff/smartphone-tablet.png"/>
-      DPI: <input id="dpiInput" value="0" />
-    </div>
-    <div class="like-section">
-      <img src="https://img.icons8.com/fluency-systems-filled/48/ffffff/facebook-like.png"/>
-      <input id="likesInput" value="0" />
-    </div>
-  </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+const input = document.getElementById('zipInput');
+const btn = document.getElementById('processBtn');
+const status = document.getElementById('status');
 
-  <div id="ytplayer"></div>
+btn.onclick = async ()=>{
+  const file = input.files[0];
+  if(!file){status.textContent='⚠️ Selecciona un archivo ZIP primero';return;}
 
-  <script>
-    const items = ["General", "Punto Rojo", "Mira X2", "Mira X4", "Mira AWM", "Vista Libre", "Tamaño Botón", "DPI"];
-    const container = document.getElementById("sensContainer");
-    const values = Array(items.length).fill(0);
-    values[7] = 0;
-
-    items.forEach((label, index) => {
-      const div = document.createElement("div");
-      div.className = "item";
-      div.innerHTML = `
-        <div class="label">${label}</div>
-        <div class="bar-container" data-index="${index}">
-          <div class="bar-fill" id="bar${index}"></div>
-        </div>
-        <input class="value" id="val${index}" value="${index === 7 ? 0 : 0}" />
-      `;
-      container.appendChild(div);
-    });
-
-    document.querySelectorAll(".bar-container").forEach(bar => {
-      bar.addEventListener("touchstart", update);
-      bar.addEventListener("touchmove", update);
-    });
-
-    function update(e) {
-      e.preventDefault();
-      const touch = e.touches[0];
-      const index = parseInt(this.dataset.index);
-      const rect = this.getBoundingClientRect();
-      const percent = Math.min(100, Math.max(0, ((touch.clientX - rect.left) / rect.width) * 100));
-      const barFill = document.getElementById(`bar${index}`);
-      const input = document.getElementById(`val${index}`);
-
-      if (index === 7) {
-        values[7] = 200 + Math.round((percent / 100) * 800);
-        barFill.style.width = `${((values[7] - 200) / 800) * 100}%`;
-        input.value = values[7];
-        document.getElementById("dpiInput").value = values[7];
-      } else {
-        values[index] = Math.round((percent / 100) * 200);
-        barFill.style.width = `${percent}%`;
-        input.value = values[index];
-      }
+  status.textContent='📦 Cargando ZIP...';
+  const zip = await JSZip.loadAsync(file);
+  const newZip = new JSZip();
+  let index=0;
+  
+  const entries = Object.keys(zip.files).filter(f=>!zip.files[f].dir);
+  if(entries.length===0){status.textContent='❌ ZIP vacío';return;}
+  
+  for(const name of entries){
+    const ext=name.split('.').pop().toLowerCase();
+    if(['png','jpg','jpeg','webp','bmp','gif'].includes(ext)){
+      const data=await zip.files[name].async('blob');
+      const newName=`IMG_${index}_frame.${ext}`;
+      newZip.file(newName,data);
+      index++;
     }
-
-    for (let i = 0; i < 8; i++) {
-      const input = document.getElementById(`val${i}`);
-      input.addEventListener("change", () => {
-        let val = parseInt(input.value);
-        if (isNaN(val)) return;
-        if (i === 7) {
-          val = Math.max(200, Math.min(1000, val));
-          values[7] = val;
-          document.getElementById("dpiInput").value = val;
-          document.getElementById("bar7").style.width = `${((val - 200) / 800) * 100}%`;
-        } else {
-          val = Math.max(0, Math.min(200, val));
-          values[i] = val;
-          document.getElementById(`bar${i}`).style.width = `${(val / 200) * 100}%`;
-        }
-        input.value = val;
-      });
-    }
-
-    document.getElementById("dpiInput").addEventListener("change", (e) => {
-      let val = parseInt(e.target.value);
-      if (isNaN(val)) return;
-      val = Math.max(200, Math.min(1000, val));
-      values[7] = val;
-      document.getElementById("val7").value = val;
-      document.getElementById("bar7").style.width = `${((val - 200) / 800) * 100}%`;
-    });
-
-    document.getElementById("likesInput").addEventListener("change", (e) => {
-      let val = parseInt(e.target.value);
-      if (isNaN(val)) e.target.value = 0;
-    });
-
-    // YouTube API script
-    const tag = document.createElement('script');
-    tag.src = "https://www.youtube.com/iframe_api";
-    document.body.appendChild(tag);
-
-    let player;
-    function onYouTubeIframeAPIReady() {
-      player = new YT.Player('ytplayer', {
-        videoId: '5tMuEHtBp2s',
-        playerVars: {
-          autoplay: 1,
-          controls: 0,
-          modestbranding: 1,
-          loop: 1,
-          playlist: '5tMuEHtBp2s',
-          fs: 0,
-          disablekb: 1,
-          mute: 0,
-          playsinline: 1
-        },
-        events: {
-          onReady: onPlayerReady,
-          onStateChange: onPlayerStateChange
-        }
-      });
-    }
-
-    function onPlayerReady(e) {
-      e.target.setVolume(100);
-      e.target.playVideo();
-
-      if (navigator.vibrate) {
-        navigator.vibrate([100, 50, 100]);
-      }
-
-      document.addEventListener("click", () => {
-        player.setVolume(100);
-        player.playVideo();
-      }, { once: true });
-
-      document.addEventListener("visibilitychange", () => {
-        if (!document.hidden) {
-          player.setVolume(100);
-          player.playVideo();
-        }
-      });
-    }
-
-    function onPlayerStateChange(e) {
-      if (e.data !== YT.PlayerState.PLAYING) {
-        player.playVideo();
-      }
-    }
-  </script>
+  }
+  status.textContent=`🔁 Renombradas ${index} imágenes...`;
+  
+  const blob=await newZip.generateAsync({type:'blob'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download='imagenes_renombradas.zip';
+  a.click();
+  URL.revokeObjectURL(url);
+  status.textContent='✅ ZIP descargado con éxito';
+};
+</script>
 </body>
 </html>
