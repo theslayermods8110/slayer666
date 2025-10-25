@@ -2,120 +2,132 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ZIP + Frames Extractor Ultra Rápido</title>
+<title>Generador Player Skeleton Pack</title>
 <style>
-body{
-  background:#111;color:#fff;font-family:sans-serif;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  height:100vh;text-align:center
-}
-input[type=file]{
-  background:#222;border:2px dashed #555;padding:20px;border-radius:10px;
-  cursor:pointer;color:#aaa;width:80%;max-width:400px;margin-bottom:10px;
-}
-button{
-  margin-top:10px;padding:10px 25px;font-size:16px;border:none;
-  border-radius:10px;background:#0a84ff;color:#fff;cursor:pointer;
-  transition:.2s
-}
-button:hover{background:#006edc;transform:scale(1.05)}
-#status{margin-top:20px;color:#0f0;font-size:15px}
+  body { font-family: sans-serif; background: #111; color: #eee; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+  h1 { margin-bottom: 20px; }
+  button { padding: 12px 20px; font-size: 16px; cursor: pointer; background: #444; border: none; color: #fff; border-radius: 6px; transition: 0.3s; }
+  button:hover { background: #666; }
+  #mensaje { margin-top: 20px; font-size: 14px; text-align:center; }
 </style>
 </head>
 <body>
-  <h2>🎞️ Renombrar ZIP o Convertir MP4 en Frames</h2>
-  <input type="file" id="zipInput" accept=".zip">
-  <button id="processZipBtn">📦 Renombrar ZIP</button>
-  <br>
-  <input type="file" id="videoInput" accept="video/mp4">
-  <button id="extractFramesBtn">🎬 Extraer Frames (MP4 → ZIP)</button>
-  <div id="status"></div>
+<h1>Generador Player Skeleton Pack</h1>
+<button id="generate">Generar y Descargar ZIP</button>
+<div id="mensaje"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script>
-const status = document.getElementById('status');
+document.getElementById('generate').addEventListener('click', async () => {
+    const mensaje = document.getElementById('mensaje');
+    mensaje.textContent = "Generando ZIP, espera...";
+    const zip = new JSZip();
 
-// 📦 Renombrar imágenes dentro del ZIP
-document.getElementById('processZipBtn').onclick = async ()=>{
-  const file = document.getElementById('zipInput').files[0];
-  if(!file){status.textContent='⚠️ Selecciona un archivo ZIP primero';return;}
-  status.textContent='📦 Procesando ZIP...';
-  const zip = await JSZip.loadAsync(file);
-  const newZip = new JSZip();
-  let i=0;
-  for(const name of Object.keys(zip.files)){
-    if(zip.files[name].dir) continue;
-    const ext=name.split('.').pop().toLowerCase();
-    if(['png','jpg','jpeg','webp','bmp','gif'].includes(ext)){
-      const data=await zip.files[name].async('blob');
-      newZip.file(`IMG_${i}_frame.${ext}`,data);
-      i++;
-    }
-  }
-  const blob=await newZip.generateAsync({type:'blob'});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download='imagenes_renombradas.zip';
-  a.click();
-  status.textContent=`✅ ${i} imágenes renombradas`;
-};
+    // Crear carpetas
+    const rp = zip.folder("player_skeleton_pack/resource_pack");
+    const bp = zip.folder("player_skeleton_pack/behavior_pack");
+    rp.folder("models");
+    rp.folder("entities");
+    rp.folder("render_controllers");
+    rp.folder("animations");
+    rp.folder("textures/entity");
+    bp.folder("entities");
 
-// 🎬 Extraer frames del MP4 rápidamente
-document.getElementById('extractFramesBtn').onclick = async ()=>{
-  const videoFile = document.getElementById('videoInput').files[0];
-  if(!videoFile){status.textContent='⚠️ Selecciona un video MP4 primero';return;}
+    // Función para UUID
+    function uuidv4() { return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,function(c){ const r=Math.random()*16|0,v=c=='x'?r:(r&0x3|0x8); return v.toString(16); }); }
 
-  status.textContent='🎞️ Analizando video...';
-  const video = document.createElement('video');
-  video.src = URL.createObjectURL(videoFile);
-  video.muted = true;
-  await video.play().catch(()=>{});
-  await new Promise(r=>video.onloadeddata=r);
+    // ---- Resource Pack ----
+    rp.file("manifest.json", JSON.stringify({
+        format_version:2,
+        header:{name:"Player Skeleton RP",description:"Stickman visual - Resource Pack",uuid:uuidv4(),version:[1,0,0],min_engine_version:[1,16,0]},
+        modules:[{type:"resources",uuid:uuidv4(),version:[1,0,0]}]
+    }, null,2));
 
-  const duration = video.duration;
-  const width = video.videoWidth, height = video.videoHeight;
-  const canvas = document.createElement('canvas');
-  canvas.width = width; canvas.height = height;
-  const ctx = canvas.getContext('2d');
-  const zip = new JSZip();
+    rp.file("models/geometry.player_skeleton.json", JSON.stringify({
+        format_version:"1.12.0",
+        "minecraft:geometry":[{"description":{"identifier":"geometry.player_skeleton","texture_width":64,"texture_height":64,"visible_bounds_width":2,"visible_bounds_height":3,"visible_bounds_offset":[0,1,0]},
+        "bones":[
+            {"name":"root","pivot":[0,0,0]},
+            {"name":"body","parent":"root","pivot":[0,12,0],"cubes":[{"origin":[-1,12,-1],"size":[2,12,2],"uv":[0,0]}]},
+            {"name":"head","parent":"body","pivot":[0,24,0],"cubes":[{"origin":[-2,24,-2],"size":[4,4,4],"uv":[0,0]}]},
+            {"name":"rightarm","parent":"body","pivot":[-3,22,0],"cubes":[{"origin":[-4,16,-1],"size":[2,12,2],"uv":[0,0]}]},
+            {"name":"leftarm","parent":"body","pivot":[3,22,0],"cubes":[{"origin":[2,16,-1],"size":[2,12,2],"uv":[0,0]}]},
+            {"name":"rightleg","parent":"body","pivot":[-1,12,0],"cubes":[{"origin":[-2,0,-1],"size":[2,12,2],"uv":[0,0]}]},
+            {"name":"leftleg","parent":"body","pivot":[1,12,0],"cubes":[{"origin":[0,0,-1],"size":[2,12,2],"uv":[0,0]}]}
+        ]}]
+    }, null,2));
 
-  let frameIndex = 0;
-  const start = performance.now();
+    rp.file("entities/player_skeleton.entity.json", JSON.stringify({
+        format_version:"1.10.0",
+        "minecraft:client_entity":{
+            description:{
+                identifier:"player_skeleton",
+                materials:[{"*":"entity_alphatest"}],
+                textures:["textures/entity/skeleton_texture"],
+                render_controllers:["controller.render.skeleton"]
+            }
+        }
+    }, null,2));
 
-  const captureFrame = async ()=>{
-    ctx.drawImage(video,0,0,width,height);
-    const blob = await new Promise(r=>canvas.toBlob(r,'image/png'));
-    zip.file(`IMG_${frameIndex}_frame.png`, blob);
-    frameIndex++;
-    status.textContent=`🖼️ Capturados ${frameIndex} frames...`;
-  };
+    rp.file("render_controllers/controller.render.skeleton.json", JSON.stringify({
+        format_version:"1.12.0",
+        render_controllers:{
+            "controller.render.skeleton":{
+                geometry:"geometry.player_skeleton",
+                materials:[{"*":"entity_alphatest"}],
+                textures:["textures/entity/skeleton_texture"]
+            }
+        }
+    }, null,2));
 
-  let lastTime = 0;
-  const processFrame = async (now, metadata)=>{
-    if(!metadata) return;
-    if(metadata.mediaTime - lastTime >= 1/30){ // 30 FPS base
-      await captureFrame();
-      lastTime = metadata.mediaTime;
-    }
-    if(metadata.mediaTime < duration)
-      video.requestVideoFrameCallback(processFrame);
-    else finalize();
-  };
+    rp.file("animations/animation.player.first_person.base_pose.json", JSON.stringify({
+        animations: {
+            "animation.player.first_person.base_pose": {
+                bones: { body: { rotation:["query.target_x_rotation","query.target_y_rotation",0] } },
+                loop:true
+            }
+        },
+        format_version:"1.8.0"
+    }, null,2));
 
-  const finalize = async ()=>{
-    const blobZip = await zip.generateAsync({type:'blob'});
-    const a=document.createElement('a');
-    a.href=URL.createObjectURL(blobZip);
-    a.download='frames_extraidos.zip';
+    // Textura mínima (1x1 blanco)
+    const pixelBase64="iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAMAASsJTYQAAAAASUVORK5CYII=";
+    const pixelBlob = atob(pixelBase64).split("").map(c=>c.charCodeAt(0));
+    rp.file("textures/entity/skeleton_texture.png", new Uint8Array(pixelBlob));
+
+    // ---- Behavior Pack ----
+    bp.file("manifest.json", JSON.stringify({
+        format_version:2,
+        header:{name:"Player Skeleton BP",description:"Stickman invocable - Behavior Pack",uuid:uuidv4(),version:[1,0,0],min_engine_version:[1,16,0]},
+        modules:[{type:"data",uuid:uuidv4(),version:[1,0,0]}]
+    }, null,2));
+
+    bp.file("entities/player_skeleton.json", JSON.stringify({
+        format_version:"1.10.0",
+        minecraft:entity:{
+            description:{
+                identifier:"player_skeleton",
+                is_spawnable:true,
+                is_summonable:true,
+                is_experimental:false,
+                materials:[{"*":"entity_alphatest"}],
+                textures:["textures/entity/skeleton_texture"],
+                geometry:"geometry.player_skeleton",
+                render_controllers:["controller.render.skeleton"]
+            },
+            components:{}
+        }
+    }, null,2));
+
+    // Generar ZIP y descargar
+    const content = await zip.generateAsync({type:"blob"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(content);
+    a.download = "player_skeleton_pack.zip";
     a.click();
-    const elapsed = ((performance.now()-start)/1000).toFixed(1);
-    const fpsReal = frameIndex/duration;
-    status.innerHTML=`✅ ${frameIndex} frames extraídos en ${elapsed}s<br>⚡ Velocidad recomendada: ${fpsReal.toFixed(2)} FPS`;
-  };
 
-  video.requestVideoFrameCallback(processFrame);
-};
+    mensaje.textContent="✅ ZIP generado. Mueve player_skeleton_pack a /sdcard/games/com.mojang/";
+});
 </script>
 </body>
 </html>
