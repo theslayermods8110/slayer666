@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Negro con Menú Secreto</title>
+    <title>Negro con Menú Blanco Secreto</title>
     <style>
         body {
             background-color: #000000;
@@ -17,15 +17,15 @@
             cursor: pointer; /* Indica que se puede clicar */
         }
 
-        /* Estilos del Menú */
+        /* Estilos del Menú (Modificados a Blanco) */
         #menu-secreto {
             display: none; /* Oculto por defecto */
             text-align: center;
-            background: rgba(30, 30, 30, 0.9);
+            background-color: #ffffff; /* Fondo Blanco */
             padding: 40px;
             border-radius: 15px;
-            border: 1px solid #333;
-            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 25px rgba(255, 255, 255, 0.3); /* Sombra suave */
+            cursor: default; /* Cursor normal dentro del menú */
         }
 
         ul {
@@ -38,39 +38,53 @@
         }
 
         a {
-            color: white;
+            color: #000000; /* Texto Negro */
             text-decoration: none;
             font-family: Arial, sans-serif;
             font-size: 1.5rem;
-            transition: color 0.3s;
+            transition: color 0.3s, background-color 0.3s;
+            padding: 10px 20px;
+            border-radius: 5px;
         }
 
         a:hover {
-            color: #00ffcc; /* Color neón al pasar el mouse */
+            color: #ffffff;
+            background-color: #333333; /* Fondo oscuro al pasar el ratón */
         }
     </style>
 </head>
-<body onclick="contarClics()">
+<body id="cuerpo" onclick="interaccionPantalla(event)">
 
-    <div id="menu-secreto">
-        <ul>
-            <li><a href="#">Inicio</a></li>
-            <li><a href="#">Home</a></li>
-            <li><a href="#" onclick="location.reload()">Salir</a></li>
+    <div id="menu-secreto" onclick="event.stopPropagation()"> <ul>
+            <li><a href="#" onclick="reiniciar()">Inicio</a></li>
+            <li><a href="#" onclick="reiniciar()">Home</a></li>
+            <li><a href="#" onclick="reiniciar(true)">Salir</a></li>
         </ul>
     </div>
 
     <script>
         let contador = 0;
+        const bodyEl = document.getElementById('cuerpo');
+        const menuEl = document.getElementById('menu-secreto');
 
-        function contarClics() {
+        function interaccionPantalla(event) {
             contador++;
             
             // Si llega a 3 clics, muestra el menú
             if (contador === 3) {
-                document.getElementById('menu-secreto').style.display = 'block';
-                // Cambiamos el cursor a normal para que el usuario interactúe con el menú
-                document.body.style.cursor = 'default';
+                menuEl.style.display = 'block';
+                bodyEl.style.cursor = 'default';
+            }
+        }
+
+        function reiniciar(recargar = false) {
+            contador = 0; // Reinicia la racha
+            menuEl.style.display = 'none'; // Oculta el menú
+            bodyEl.style.cursor = 'pointer'; // Vuelve a poner el cursor de "clic"
+
+            if (recargar) {
+                // Si es "Salir", simplemente recargamos para simular la salida
+                location.reload();
             }
         }
     </script>
