@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>THE SLAYER MODZ - Licencia</title>
+<link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Orbitron:wght@700&display=swap" rel="stylesheet">
 <style>
   *{margin:0;padding:0;box-sizing:border-box;font-family:Arial, sans-serif;}
   body{
@@ -14,13 +15,12 @@
   }
   .card{width:100%; max-width:420px; text-align:center;}
   h1{
-    font-size:33px; letter-spacing:2px; margin:10px 0 5px;
-    background: linear-gradient(to bottom, #ffffff 20%, #ff5a5a 80%, #ff0000);
-    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
-    text-shadow:0 0 25px rgba(255,0,0,.6);
-    -webkit-text-stroke:1px black;
+    font-family:'Black Ops One', cursive;
+    font-size:36px; letter-spacing:1px; margin:10px 0 5px; line-height:1.1;
+    color:#fff;
+    text-shadow: 0 0 5px #ff0000, 0 0 15px #ff0000, 0 0 30px #ff0000, 3px 3px 0 #000;
   }
-  p.sub{color:#ffb3b3; font-size:14px; margin-bottom:25px; letter-spacing:1px;}
+  p.sub{color:#ffb3b3; font-size:13px; margin-bottom:25px; letter-spacing:2px; font-family:'Orbitron', sans-serif; font-weight:700;}
   .box{
     background: rgba(0,0,0,.65);
     border:1px solid #330000;
@@ -34,7 +34,8 @@
     padding:18px 10px; border-radius:10px; margin-bottom:15px;
   }
   #keyText{
-    font-size:21px; font-weight:bold; letter-spacing:1px;
+    font-family:'Orbitron', monospace;
+    font-size:20px; font-weight:700; letter-spacing:1px;
     color:#ff5555; word-break:break-all; line-height:1.4;
   }
   .btn{
@@ -51,14 +52,14 @@
 <body>
 
 <div class="card">
-  <h1>THE SLAYER MODZ</h1>
+  <h1>THE SLAYER<br>MODZ</h1>
   <p class="sub">OBTENER LICENCIA • ACCESO PREMIUM</p>
 
   <div class="box">
     <div class="label">TU LICENCIA ES:</div>
 
     <div class="key-box">
-      <div id="keyText">GENERANDO...</div>
+      <div id="keyText">SLAYER-H482-HE391</div>
     </div>
 
     <button class="btn" onclick="copiar()">COPIAR KEY</button>
@@ -71,24 +72,12 @@
 </div>
 
 <script>
-  let keyGenerada = "";
-
-  function generar(){
-    // Formato: SLAYER-H000-HE000-E000
-    // H + 3 números, HE + 3 números, E + 3 números
-    function num3(){ return Math.floor(100 + Math.random()*900); }
-    keyGenerada = "SLAYER-H" + num3() + "-HE" + num3() + "-E" + num3();
-    document.getElementById("keyText").innerText = keyGenerada;
-  }
-
+  const keyGenerada = "SLAYER-H482-HE391";
   function copiar(){
     navigator.clipboard.writeText(keyGenerada).then(()=>{
       document.getElementById("msg").innerText = "📋 Copiada al portapapeles";
     });
   }
-
-  // Se genera sola al entrar, sin tocar nada
-  generar();
 </script>
 
 </body>
