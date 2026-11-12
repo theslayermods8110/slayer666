@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>THE SLAYER MODZ - Obtener Licencia</title>
+<title>THE SLAYER MODZ - Licencia</title>
 <style>
   *{margin:0;padding:0;box-sizing:border-box;font-family:Arial, sans-serif;}
   body{
@@ -12,12 +12,9 @@
     display:flex; justify-content:center; align-items:center;
     padding:20px; color:white;
   }
-  .card{
-    width:100%; max-width:420px;
-    text-align:center;
-  }
+  .card{width:100%; max-width:420px; text-align:center;}
   h1{
-    font-size:32px; letter-spacing:2px; margin:10px 0 5px;
+    font-size:33px; letter-spacing:2px; margin:10px 0 5px;
     background: linear-gradient(to bottom, #ffffff 20%, #ff5a5a 80%, #ff0000);
     -webkit-background-clip:text; -webkit-text-fill-color:transparent;
     text-shadow:0 0 25px rgba(255,0,0,.6);
@@ -27,32 +24,27 @@
   .box{
     background: rgba(0,0,0,.65);
     border:1px solid #330000;
-    border-radius:14px; padding:20px;
+    border-radius:14px; padding:22px;
     box-shadow:0 20px 40px rgba(0,0,0,.5);
-    text-align:left;
+    text-align:center;
   }
-  label{font-size:12px; letter-spacing:1px; color:#ccc; display:block; margin-bottom:8px;}
-  input{
-    width:100%; height:52px; background:#000; color:white;
-    border:1px solid #333; padding:0 14px; font-size:15px; outline:none;
+  .label{font-size:12px; letter-spacing:2px; color:#ccc; margin-bottom:14px;}
+  .key-box{
+    background:#000; border:1px dashed #ff0000;
+    padding:18px 10px; border-radius:10px; margin-bottom:15px;
   }
-  input:focus{border-color:#ff0000;}
+  #keyText{
+    font-size:21px; font-weight:bold; letter-spacing:1px;
+    color:#ff5555; word-break:break-all; line-height:1.4;
+  }
   .btn{
     width:100%; height:52px; border:none; cursor:pointer;
-    font-weight:bold; font-size:15px; letter-spacing:1px; margin-top:12px;
-    transition:.2s;
+    font-weight:bold; font-size:15px; letter-spacing:1px;
+    background:#FF0000; color:white;
   }
-  .btn-red{background:#FF0000; color:white;}
-  .btn-red:hover{background:#ff2222; transform:scale(1.01);}
-  .btn-gray{background:#333333; color:white;}
-  .btn-gray:hover{background:#444;}
-  #keyBox{
-    display:none; margin-top:15px; background:#000; border:1px dashed #ff0000;
-    padding:14px; text-align:center; border-radius:10px;
-  }
-  #keyText{font-size:18px; font-weight:bold; letter-spacing:2px; color:#ff5555; word-break:break-all;}
-  #msg{margin-top:12px; text-align:center; font-size:14px; font-weight:bold; min-height:20px;}
-  .ok{color:#00ff88;} .error{color:#ff4444;}
+  .btn:active{transform:scale(.98);}
+  #msg{margin-top:12px; font-size:14px; font-weight:bold; min-height:20px; color:#00ff88;}
+  .info{margin-top:14px; font-size:12px; color:#aaa; line-height:1.5;}
   footer{margin-top:18px; font-size:11px; color:#999; text-align:center;}
 </style>
 </head>
@@ -63,19 +55,16 @@
   <p class="sub">OBTENER LICENCIA • ACCESO PREMIUM</p>
 
   <div class="box">
-    <label>OBTENER LICENCIA</label>
-    <input id="inputKey" type="text" placeholder="INGRESA TU KEY">
+    <div class="label">TU LICENCIA ES:</div>
 
-    <button class="btn btn-red" onclick="getKey()">GET KEY</button>
-    <button class="btn btn-gray" onclick="verificar()">VERIFICAR KEY</button>
-
-    <div id="keyBox">
-      <div style="font-size:12px;color:#aaa;margin-bottom:6px;">TU LICENCIA ES:</div>
-      <div id="keyText"></div>
-      <button class="btn btn-red" onclick="copiar()" style="margin-top:10px;">COPIAR KEY</button>
+    <div class="key-box">
+      <div id="keyText">GENERANDO...</div>
     </div>
 
+    <button class="btn" onclick="copiar()">COPIAR KEY</button>
     <div id="msg"></div>
+
+    <div class="info">Copia esta key y pégala en la app<br>en INGRESA TU KEY para activar tu licencia.</div>
   </div>
 
   <footer>© 2026 THE SLAYER MODZ - Todos los derechos reservados</footer>
@@ -84,35 +73,22 @@
 <script>
   let keyGenerada = "";
 
-  function getKey(){
-    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ0123456789";
-    let a="", b="";
-    for(let i=0;i<4;i++){ a+=chars[Math.floor(Math.random()*chars.length)]; b+=chars[Math.floor(Math.random()*chars.length)]; }
-    keyGenerada = "SLAYER-" + a + "-" + b;
+  function generar(){
+    // Formato: SLAYER-H000-HE000-E000
+    // H + 3 números, HE + 3 números, E + 3 números
+    function num3(){ return Math.floor(100 + Math.random()*900); }
+    keyGenerada = "SLAYER-H" + num3() + "-HE" + num3() + "-E" + num3();
     document.getElementById("keyText").innerText = keyGenerada;
-    document.getElementById("keyBox").style.display = "block";
-    document.getElementById("inputKey").value = keyGenerada;
-    document.getElementById("msg").innerHTML = '<span class="ok">✅ Licencia generada. Cópiala y úsala en la app</span>';
-  }
-
-  function verificar(){
-    const v = document.getElementById("inputKey").value.trim();
-    const msg = document.getElementById("msg");
-    if(!v){
-      msg.innerHTML = '<span class="error">⚠️ Primero ingresa tu KEY</span>';
-      return;
-    }
-    if(v.startsWith("SLAYER-") && v.length >= 12){
-      msg.innerHTML = '<span class="ok">✅ KEY CORRECTA - LICENCIA ACTIVADA</span>';
-    } else {
-      msg.innerHTML = '<span class="error">❌ KEY INCORRECTA</span>';
-    }
   }
 
   function copiar(){
-    navigator.clipboard.writeText(keyGenerada);
-    document.getElementById("msg").innerHTML = '<span class="ok">📋 Copiada al portapapeles</span>';
+    navigator.clipboard.writeText(keyGenerada).then(()=>{
+      document.getElementById("msg").innerText = "📋 Copiada al portapapeles";
+    });
   }
+
+  // Se genera sola al entrar, sin tocar nada
+  generar();
 </script>
 
 </body>
