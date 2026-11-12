@@ -4,6 +4,14 @@ workflows:
     max_build_duration: 120
     instance_type: mac_mini_m2
     scripts:
+      - name: Install .NET 8
+        script: |
+          export DOTNET_PATH=$CM_BUILD_DIR/dotnet
+          curl -sSL https://dot.net/v1/dotnet-install.sh -o dotnet-install.sh
+          chmod +x dotnet-install.sh
+          ./dotnet-install.sh --channel 8.0 --install-dir $DOTNET_PATH
+          echo "export PATH=$DOTNET_PATH:$PATH" >> $CM_ENV
+          echo "export DOTNET_ROOT=$DOTNET_PATH" >> $CM_ENV
       - name: Install MAUI workload
         script: dotnet workload install maui
       - name: Build APK
