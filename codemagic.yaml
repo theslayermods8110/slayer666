@@ -3,8 +3,6 @@ workflows:
     name: MAUI Android
     max_build_duration: 120
     instance_type: mac_mini_m2
-    environment:
-      dotnet: 8.0.100
     scripts:
       - name: Install MAUI workload
         script: dotnet workload install maui
