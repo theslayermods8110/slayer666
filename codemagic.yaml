@@ -6,12 +6,10 @@ workflows:
     scripts:
       - name: Build APK
         script: |
-          export DOTNET_PATH=$CM_BUILD_DIR/dotnet
-          curl -sSL https://dot.net/v1/dotnet-install.sh -o dotnet-install.sh
-          chmod +x dotnet-install.sh
-          ./dotnet-install.sh --channel 8.0 --install-dir $DOTNET_PATH
-          export PATH=$DOTNET_PATH:$PATH
-          $DOTNET_PATH/dotnet workload install maui
-          $DOTNET_PATH/dotnet build -f net8.0-android -c Release
+          export PATH=/usr/local/share/dotnet:$PATH
+          which dotnet
+          dotnet --info
+          dotnet workload install maui
+          dotnet build -f net8.0-android -c Release
     artifacts:
       - '**/*.apk'
